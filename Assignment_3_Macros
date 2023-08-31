@@ -1,0 +1,158 @@
+//============================================================================
+// Name        : Assignment3.cpp
+// Author      : Pranav Jaju
+// Version     :
+// Copyright   : Your copyright notice
+// Description : Hello World in C++, Ansi-style
+//============================================================================
+
+#include <bits/stdc++.h>
+using namespace std;
+
+class macro{
+  vector<pair<string,string>> kpdtab;
+  map<string,int> pnttab;
+  vector<vector<string>> mnttab;
+  ifstream ip;
+  ofstream op;
+  ofstream kp;
+  ofstream mp;
+  ofstream mnt;
+  ofstream pnt;
+  bool macroflag;
+  bool macroend;
+  int p;
+  int inc;
+  public:
+      macro(){
+    	  cout<<"\nMacro Pass1 code begins...\n";
+    	  ip.open("input.txt");
+    	  op.open("output.txt",ios::app);
+    	  kp.open("kdptab.txt",ios::app);
+    	  mp.open("mdt.txt",ios::app);
+    	  mnt.open("mnt.txt",ios::app);
+    	  pnt.open("pnttab.txt",ios::app);
+    	  macroflag = false;
+    	  macroend = false;
+    	  p = 1;
+    	  inc = 1;
+      }
+      void executePass1(){
+    	  string line,word;
+    	 while(getline(ip,line)){
+    		 stringstream ss(line);
+    		 ss>>word;
+    		 if(word=="MACRO"){
+    			 macroflag = true;
+    			 continue;
+    		 }
+    		 if(macroend){
+    			 if(word=="END"){
+    				 op<<word<<" ";
+    				 while(ss>>word){
+    					 op<<word<<" ";
+    				 }
+    				 op<<endl;
+    			 }
+    			 continue;
+    		 }
+    		 if(macroflag){
+    			 vector<string> a(5," ");
+    			 mnttab.push_back(a);
+    			 int i = mnttab.size() - 1;
+    			 mnttab[i][0] = word;
+    			 mnttab[i][3] = to_string(p);
+    			 pnt << "\nPNTTAB FOR MACRO" << inc <<"\n";
+    			 int pp = 0;
+    			 int kk = 0;
+    			 while(ss>>word){
+    				 if(word[word.size()-1]==','){
+    					 word = word.substr(0,word.size()-2);  //could change size?
+    				 }
+    				 else{
+						word = word.substr(0, word.length() - 1);       //could change size?
+    				 }
+    				 int equindex = -1;
+    				 for(unsigned int k = 0;k<word.size();k++){
+    					 if(word=="="){
+    						 equindex = k;
+    						 break;
+    					 }
+    				 }
+    				 if(equindex == -1){
+    					 pp++;
+    					 pnttab.insert({word,pnttab.size()+1});
+    					 pnt << pnttab[word] <<" -> "<<word;
+    				 }
+    				 else{
+    					 kk++;
+    					 string before,after;
+    					 before = word.substr(0,word.size()-1);to_string(kpdtab.size() - kk + 1);
+    					 after = word.substr(equindex + 1);
+    					 kpdtab.push_back({before,after});
+    					 pnttab.insert({before,pnttab.size()+1});
+    					 pnt << pnttab[before] <<" -> "<<before;
+
+    				 }
+    			 }
+    			 mnttab[i][1] = pp;
+    			 mnttab[i][2] = kk;
+    			 if(kk != 0 ){
+    				 mnttab[i][4] = to_string(kpdtab.size() - kk + 1);
+    			 }
+    			 else{
+    				 mnttab[i][4] = "-";
+    			 }
+    			 macroflag = false;
+    			 continue;
+    		 }
+    		 if(word == "MEND"){
+    			 mp<<"MEND"<<endl;
+    			 pnttab.clear();
+    			 inc++;
+    		 }
+    		 else if(word == "START"){
+    			 macroend = true;
+    		 }
+    		 else{
+    			 mp <<word;
+    			 while (ss >> word)
+				 {
+    				if (word[0] == '&'){
+					    word = word.substr(1);
+					    if (word[word.size() - 1] == ','){
+    			          word = word.substr(0, word.size() - 1);
+    			        }
+    			        mp << "(P," << pnttab[word] << "), ";
+    			     }
+					else{
+    			        if (word[word.size() - 1] == ','){
+    			        word = word.substr(0, word.size() - 1);
+    			         }
+    			       mp << word << ", ";
+    			    }
+    		     }
+    		  mp << endl;
+    		 }
+    		 p++;
+
+    	 }
+    	 ip.close();
+    	 for(unsigned int i = 0;i<mnttab.size();i++){
+    		 for(int j = 0;j<5;j++){
+    			 mnt<<mnttab[i][j]<<" ";
+    		 }
+    		 mnt<<endl;
+    	 }
+    	 for (auto i : kpdtab){
+    	         kp << i.first << " " << i.second << endl;
+    	     }
+    	 cout<<"Program Executed !!!";
+
+      }
+};
+int main() {
+    macro m1;
+    m1.executePass1();
+	return 0;
+}
